@@ -16,11 +16,11 @@ const DroneIcon = () => (
 
 // Array of your navigation links to keep the component clean
 const navLinks = [
-  { href: "/home/", label: "Home Page" },
+  { href: "/home/", label: "" },
   { href: "/target_detection/", label: "Target Detection Mode" },
   { href: "/target_detection/demo/", label: "Demo cctv upload page" },
   { href: "/restricted_mode/", label: "Thermal Imaging" },
-  { href: "/crowd_management/", label: "Crowd Management Mode" },
+  { href: "/crowd_management/", label: "Debris Detection" },
 ];
 
 export default function App() {
