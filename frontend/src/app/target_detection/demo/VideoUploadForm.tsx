@@ -40,6 +40,9 @@ export default function VideoUploadForm() {
   });
   const [loading, setLoading] = useState(false);
 
+  // -------------------------
+  // Authenticator
+  // -------------------------
   const authenticator = useCallback(async () => {
     try {
       const response = await fetch("/api/auth");
@@ -51,15 +54,22 @@ export default function VideoUploadForm() {
     }
   }, []);
 
+  // -------------------------
+  // Upload Handlers
+  // -------------------------
   const handleUploadSuccess = useCallback((res: UploadResponse) => {
     console.log("Upload success:", res);
     setFormData((prev) => ({ ...prev, video_url: res.url }));
   }, []);
 
   const handleUploadError = useCallback((err: UploadError) => {
+    alert("Upload error");
     console.error("Upload error:", err);
   }, []);
 
+  // -------------------------
+  // Input Change
+  // -------------------------
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
@@ -69,7 +79,7 @@ export default function VideoUploadForm() {
             ...prev,
             coordinates: {
               ...prev.coordinates,
-              [name]: value ? parseFloat(value) : "",
+              [name]: value === "" ? 0 : parseFloat(value),
             },
           };
         }
@@ -79,6 +89,9 @@ export default function VideoUploadForm() {
     []
   );
 
+  // -------------------------
+  // Submit Handler
+  // -------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.video_url) {
@@ -88,18 +101,25 @@ export default function VideoUploadForm() {
 
     setLoading(true);
     console.log("Sending request to backend:", formData);
-    console.log("Backend url: ", BACKEND_URL);
 
+    if (!BACKEND_URL) {
+      console.error("NEXT_PUBLIC_COLLAB_PUBLIC_URL is not set");
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Prepare correct body matching backend expectation
     const requestBody = {
       CCTV_id: String(formData.cctv_id),
       location: formData.location_name,
-      latlong: [formData.coordinates.lat, formData.coordinates.lng],
+      lat: formData.coordinates.lat,
+      lon: formData.coordinates.lng,
       timestamp: new Date().toISOString(),
-      Url: formData.video_url,
+      video_url: formData.video_url, // ✅ fixed key
     };
 
     try {
-      const response = await fetch(`${BACKEND_URL}/cctv-data`, {
+      const response = await fetch(`${BACKEND_URL}/analyze`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +137,16 @@ export default function VideoUploadForm() {
       const data = await response.json();
       console.log("Response received from backend:", data);
 
-      window.location.reload();
+      // ✅ Example: display backend analysis result
+      if (data.human_detected) {
+        alert(
+          `✅ Human detected at (${data.lat}, ${data.lon})\nSpeech labels: ${data.audio_analysis
+            .map((a: any) => `${a.label} (${a.speech_ratio})`)
+            .join(", ")}`
+        );
+      } else {
+        alert("No human detected in the video.");
+      }
     } catch (error) {
       console.error("Upload error:", error);
     } finally {
@@ -125,6 +154,9 @@ export default function VideoUploadForm() {
     }
   };
 
+  // -------------------------
+  // JSX (UI untouched)
+  // -------------------------
   return (
     <Card className="w-full">
       <CardHeader>

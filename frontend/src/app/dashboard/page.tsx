@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, BellRing, Video, MapPin } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
 
 // Lightweight Three.js background
 import * as THREE from "three";
@@ -35,6 +34,14 @@ export default function DashboardPage() {
     { second: number; max_debris_detected: number }[]
   >([]);
   const [isLoadingTimeline, setIsLoadingTimeline] = useState(false);
+  const [personFoundFromVideo, setPersonFoundFromVideo] = useState<null | boolean>(null);
+  const [droneLatInput, setDroneLatInput] = useState<string>("");
+  const [droneLonInput, setDroneLonInput] = useState<string>("");
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [audioAnalysis, setAudioAnalysis] = useState<
+    { timestamp: number; speech_ratio: number; label?: string }[]
+  >([]);
 
   // Derived metrics
   const totalPeopleDetected = useMemo(
@@ -74,27 +81,141 @@ export default function DashboardPage() {
     const fetchTimeline = async () => {
       setIsLoadingTimeline(true);
       try {
-        const response = await fetch(`${BACKEND_URL}/video-count-population`, {
+        setFetchError(null);
+        if (!BACKEND_URL) {
+          console.error("NEXT_PUBLIC_COLLAB_PUBLIC_URL is not set");
+          setTimelineData([]);
+          setFetchError("Backend URL missing");
+          return;
+        }
+        if (!/^https?:\/\//i.test(BACKEND_URL)) {
+          console.error("Invalid BACKEND_URL, must include protocol (http/https):", BACKEND_URL);
+          setTimelineData([]);
+          setFetchError("Invalid backend URL (missing protocol)");
+          return;
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        // Use Next.js API proxy to avoid CORS and ensure backend reachability
+        const response = await fetch(`${BACKEND_URL}/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ video_url: videoURL, metadata: {} }),
+          body: JSON.stringify({
+            video_url: videoURL,
+            metadata: {
+              // pass-through of optional lat/lon provided by user
+              lat: droneLatInput ? Number(droneLatInput) : undefined,
+              lon: droneLonInput ? Number(droneLonInput) : undefined,
+            },
+          }),
+          signal: controller.signal,
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        const transformed = data.map((item: any) => ({
-          second: item.second,
-          max_debris_detected: item.max_debris_detected,
-        }));
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          // Attempt to surface upstream error details from proxy
+          let errText = "";
+          try {
+            const maybeJson = await response.json();
+            errText = typeof maybeJson === "object" ? (maybeJson.error || JSON.stringify(maybeJson)) : String(maybeJson);
+            if (maybeJson?.details) {
+              errText += ` | details: ${typeof maybeJson.details === "string" ? maybeJson.details : JSON.stringify(maybeJson.details)}`;
+            }
+            if (maybeJson?.triedPaths) {
+              errText += ` | tried: ${maybeJson.triedPaths.join(", ")}`;
+            }
+          } catch {
+            try {
+              errText = await response.text();
+            } catch {
+              errText = "";
+            }
+          }
+          throw new Error(`HTTP ${response.status}${errText ? ` - ${errText}` : ""}`);
+        }
+        let data: any;
+        try {
+          data = await response.json();
+        } catch (parseErr) {
+          const raw = await response.text();
+          console.warn("Non-JSON response from video-count-population:", raw);
+          setTimelineData([]);
+          setPersonFoundFromVideo(null);
+          setFetchError("Non-JSON response from backend");
+          return;
+        }
+
+        // If backend returns the new object shape with human_detected and lat/lon
+        if (data && typeof data === "object" && ("human_detected" in data)) {
+          const hd = (data as any).human_detected;
+          const detected = hd === true || hd === "true";
+          setPersonFoundFromVideo(detected);
+
+          // place a marker when detected
+          const latNum = typeof data.lat === "number" ? data.lat : parseFloat(data.lat);
+          const lonNum = typeof data.lon === "number" ? data.lon : parseFloat(data.lon);
+          if (detected && Number.isFinite(latNum) && Number.isFinite(lonNum)) {
+            setTargetFoundAt((prev) => [
+              ...prev,
+              {
+                cctv_id: "DRONE",
+                location_name: "Drone Detection",
+                coordinates: { lat: latNum, lng: lonNum },
+                timestamp: new Date(),
+              },
+            ]);
+          }
+
+          // Build a minimal timeline if timestamps are provided
+          if (Array.isArray(data.timestamps)) {
+            const safe = (data.timestamps as any[])
+              .filter((s: any) => typeof s === "number" && Number.isFinite(s))
+              .map((s: number) => ({ second: s, max_debris_detected: detected ? 1 : 0 }));
+            setTimelineData(safe);
+          } else {
+            setTimelineData([]);
+          }
+
+          // Capture audio analysis if provided
+          if (Array.isArray(data.audio_analysis)) {
+            const aa = (data.audio_analysis as any[])
+              .map((e: any) => ({
+                timestamp: Number(e?.timestamp),
+                speech_ratio: Number(e?.speech_ratio),
+                label: typeof e?.label === "string" ? e.label : undefined,
+              }))
+              .filter((e) => Number.isFinite(e.timestamp) && Number.isFinite(e.speech_ratio));
+            setAudioAnalysis(aa);
+          } else {
+            setAudioAnalysis([]);
+          }
+          return;
+        }
+
+        // Fallback to the original array shape
+        const arr = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        const transformed = Array.isArray(arr)
+          ? arr
+              .filter((item: any) => item && typeof item.second === "number")
+              .map((item: any) => ({
+                second: Number(item.second),
+                max_debris_detected: Number(item.max_debris_detected) || 0,
+              }))
+          : [];
         setTimelineData(transformed);
       } catch (e) {
         console.error("Error fetching timeline:", e);
+        setTimelineData([]);
+        setPersonFoundFromVideo(null);
+        setAudioAnalysis([]);
+        setFetchError((e as Error)?.message || "Failed to fetch");
       } finally {
         setIsLoadingTimeline(false);
       }
     };
 
     fetchTimeline();
-  }, [videoURL]);
+  }, [videoURL, refreshKey]);
 
   // GSAP: section reveals and parallax accents
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -255,8 +376,30 @@ export default function DashboardPage() {
             <div className="px-5 pt-4 flex items-center justify-between">
               <h2 className="font-semibold text-lg">Drone Footage</h2>
             </div>
-            <CardContent className="p-5">
+            <CardContent className="p-5 space-y-4">
               <UploadVideoContainer setVideoURL={setVideoURL} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-400" htmlFor="drone-lat">Latitude (optional)</label>
+                  <input
+                    id="drone-lat"
+                    className="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-sm text-gray-100 placeholder:text-gray-500"
+                    placeholder="e.g. 12.34"
+                    value={droneLatInput}
+                    onChange={(e) => setDroneLatInput(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-400" htmlFor="drone-lon">Longitude (optional)</label>
+                  <input
+                    id="drone-lon"
+                    className="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-sm text-gray-100 placeholder:text-gray-500"
+                    placeholder="e.g. 56.78"
+                    value={droneLonInput}
+                    onChange={(e) => setDroneLonInput(e.target.value)}
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -266,14 +409,29 @@ export default function DashboardPage() {
           <Card className="bg-black border-gray-800/80 overflow-hidden">
             <div className="px-5 pt-4 flex items-center justify-between">
               <h2 className="font-semibold text-lg">Live Video Preview</h2>
-              {videoURL ? (
-                <Badge variant="outline" className="border-sky-400/40 text-sky-300">Ready</Badge>
-              ) : (
-                <Badge variant="outline" className="border-gray-600 text-gray-400">Idle</Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {videoURL ? (
+                  <Badge variant="outline" className="border-sky-400/40 text-sky-300">Ready</Badge>
+                ) : (
+                  <Badge variant="outline" className="border-gray-600 text-gray-400">Idle</Badge>
+                )}
+              </div>
             </div>
             <CardContent className="p-0">
               <VideoContainer videoURL={videoURL} />
+              {typeof personFoundFromVideo === "boolean" && (
+                <div className="px-5 py-3 border-t border-gray-800/80 bg-gray-900/40">
+                  {personFoundFromVideo ? (
+                    <div className="text-sm text-emerald-300 flex items-center gap-2">
+                      <BellRing className="h-4 w-4" /> Backend indicates a human is detected in this footage. Marker added to map.
+                    </div>
+                  ) : (
+                    <div className="text-sm text-rose-300 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" /> No human detected in this footage.
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -297,28 +455,6 @@ export default function DashboardPage() {
 
         {/* Right rail: Metrics & Timeline */}
         <div ref={rightRailRef} className="flex flex-col gap-6">
-          <Card className="bg-gray-900/60 border-gray-800/80 overflow-hidden">
-            <div className="px-5 pt-4 flex items-center justify-between">
-              <h2 className="font-semibold text-lg">Drone Snapshot</h2>
-              <Badge variant="outline" className="border-sky-400/30 text-sky-300">Live Asset</Badge>
-            </div>
-            <CardContent className="p-0">
-              <div className="relative w-full h-48 md:h-56 lg:h-56">
-                <Image
-                  src="/drone.jpeg"
-                  alt="Search-and-rescue drone"
-                  fill
-                  priority
-                  className="object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur px-3 py-2 text-xs flex items-center justify-between">
-                  <span className="text-gray-200">UAV feed placeholder</span>
-                  <span className="text-sky-300">Imagery + voice-guided search</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card className="bg-gray-900/60 border-gray-800/80">
             <div className="px-5 pt-4">
               <h2 className="font-semibold text-lg">People Detection</h2>
@@ -346,11 +482,16 @@ export default function DashboardPage() {
           <Card className="bg-gray-900/60 border-gray-800/80 overflow-hidden">
             <div className="px-5 pt-4 flex items-center justify-between">
               <h2 className="font-semibold text-lg">Detection Timeline</h2>
-              {isLoadingTimeline ? (
-                <Badge variant="outline" className="border-amber-400/30 text-amber-300">Processing</Badge>
-              ) : (
-                <Badge variant="outline" className="border-emerald-400/30 text-emerald-300">Updated</Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {fetchError && (
+                  <Badge variant="outline" className="border-rose-400/30 text-rose-300">{fetchError}</Badge>
+                )}
+                {isLoadingTimeline ? (
+                  <Badge variant="outline" className="border-amber-400/30 text-amber-300">Processing</Badge>
+                ) : (
+                  <Badge variant="outline" className="border-emerald-400/30 text-emerald-300">Updated</Badge>
+                )}
+              </div>
             </div>
             <CardContent className="p-4 max-h-[280px] overflow-y-auto space-y-2">
               {timelineData.length ? (
@@ -366,6 +507,30 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
+          <Card className="bg-gray-900/60 border-gray-800/80 overflow-hidden">
+            <div className="px-5 pt-4 flex items-center justify-between">
+              <h2 className="font-semibold text-lg">Audio Analysis</h2>
+              {audioAnalysis.length ? (
+                <Badge variant="outline" className="border-sky-400/30 text-sky-300">{audioAnalysis.length} entries</Badge>
+              ) : null}
+            </div>
+            <CardContent className="p-4 max-h-[220px] overflow-y-auto space-y-2">
+              {audioAnalysis.length ? (
+                audioAnalysis.map((a, idx) => (
+                  <div key={idx} className="p-3 rounded-md bg-gray-800/70 border border-gray-700/60 flex items-center justify-between">
+                    <div className="text-xs text-gray-300">{formatTime(a.timestamp)}</div>
+                    <div className="text-sm font-semibold text-emerald-300">
+                      {(a.label || "").toString() || "n/a"}
+                      <span className="ml-2 text-xs text-gray-400">({(a.speech_ratio * 100).toFixed(1)}%)</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-400">No audio analysis available.</div>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="bg-gray-900/60 border-gray-800/80">
             <div className="px-5 pt-4">
               <h2 className="font-semibold text-lg">Status Legend</h2>
@@ -376,7 +541,13 @@ export default function DashboardPage() {
           </Card>
 
           <div className="flex items-center justify-between">
-            <Button variant="outline" className="border-gray-700 text-gray-300">Refresh</Button>
+            <Button
+              variant="outline"
+              className="border-gray-700 text-gray-300"
+              onClick={() => setRefreshKey((k) => k + 1)}
+            >
+              Refresh
+            </Button>
             <span className="text-xs text-gray-500">APIs unchanged; reading live from backend</span>
           </div>
         </div>
