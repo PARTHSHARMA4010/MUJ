@@ -27,7 +27,8 @@ const stats = [
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [activeCard, setActiveCard] = useState(null);
+  const [activeCard, setActiveCard] = useState<number | null>(null);
+
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
