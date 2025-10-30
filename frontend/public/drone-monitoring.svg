@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Sky Background -->
+  <rect width="800" height="600" fill="#E3F2FD"/>
+  
+  <!-- Drone Body -->
+  <g transform="translate(400, 200)">
+    <!-- Main Body -->
+    <rect x="-60" y="-20" width="120" height="40" rx="10" fill="#455A64" stroke="#263238" stroke-width="2"/>
+    
+    <!-- Camera -->
+    <circle cx="0" cy="10" r="15" fill="#78909C" stroke="#455A64" stroke-width="2"/>
+    <circle cx="0" cy="10" r="8" fill="#263238"/>
+    <circle cx="0" cy="10" r="3" fill="#B0BEC5"/>
+    
+    <!-- Arms -->
+    <line x1="-60" y1="0" x2="-120" y2="-20" stroke="#455A64" stroke-width="8"/>
+    <line x1="60" y1="0" x2="120" y2="-20" stroke="#455A64" stroke-width="8"/>
+    <line x1="-60" y1="0" x2="-120" y2="20" stroke="#455A64" stroke-width="8"/>
+    <line x1="60" y1="0" x2="120" y2="20" stroke="#455A64" stroke-width="8"/>
+    
+    <!-- Propellers -->
+    <g transform="translate(-120, -20)">
+      <circle cx="0" cy="0" r="10" fill="#37474F"/>
+      <line x1="-30" y1="0" x2="30" y2="0" stroke="#FFA000" stroke-width="5"/>
+      <line x1="0" y1="-30" x2="0" y2="30" stroke="#FFA000" stroke-width="5"/>
+    </g>
+    
+    <g transform="translate(120, -20)">
+      <circle cx="0" cy="0" r="10" fill="#37474F"/>
+      <line x1="-30" y1="0" x2="30" y2="0" stroke="#FFA000" stroke-width="5"/>
+      <line x1="0" y1="-30" x2="0" y2="30" stroke="#FFA000" stroke-width="5"/>
+    </g>
+    
+    <g transform="translate(-120, 20)">
+      <circle cx="0" cy="0" r="10" fill="#37474F"/>
+      <line x1="-30" y1="0" x2="30" y2="0" stroke="#FFA000" stroke-width="5"/>
+      <line x1="0" y1="-30" x2="0" y2="30" stroke="#FFA000" stroke-width="5"/>
+    </g>
+    
+    <g transform="translate(120, 20)">
+      <circle cx="0" cy="0" r="10" fill="#37474F"/>
+      <line x1="-30" y1="0" x2="30" y2="0" stroke="#FFA000" stroke-width="5"/>
+      <line x1="0" y1="-30" x2="0" y2="30" stroke="#FFA000" stroke-width="5"/>
+    </g>
+    
+    <!-- Status Light -->
+    <circle cx="-40" cy="-10" r="5" fill="#4CAF50"/>
+  </g>
+  
+  <!-- Scanning Beams -->
+  <path d="M400,220 L300,500" stroke="#29B6F6" stroke-width="2" stroke-dasharray="10,5" opacity="0.7"/>
+  <path d="M400,220 L500,500" stroke="#29B6F6" stroke-width="2" stroke-dasharray="10,5" opacity="0.7"/>
+  
+  <!-- Disaster Area (Simplified) -->
+  <g transform="translate(0, 500)">
+    <!-- Ground -->
+    <rect x="0" y="0" width="800" height="100" fill="#795548"/>
+    
+    <!-- Debris and Rubble -->
+    <path d="M200,0 L230,-30 L260,-10 L300,-40 L330,-20 L350,0" fill="#A1887F"/>
+    <path d="M450,0 L480,-25 L510,-5 L540,-35 L580,0" fill="#A1887F"/>
+    
+    <!-- Broken Structures -->
+    <rect x="250" y="-80" width="40" height="50" fill="#90A4AE" transform="rotate(15)"/>
+    <rect x="500" y="-60" width="30" height="40" fill="#90A4AE" transform="rotate(-10)"/>
+  </g>
+  
+  <!-- Data Visualization Elements -->
+  <g transform="translate(650, 150)">
+    <!-- HUD Frame -->
+    <rect x="-100" y="-80" width="200" height="160" rx="10" fill="rgba(0,0,0,0.1)" stroke="#455A64" stroke-width="2"/>
+    
+    <!-- Data Points -->
+    <text x="0" y="-50" font-family="Arial" font-size="12" text-anchor="middle" fill="#263238">DEBRIS SCAN ACTIVE</text>
+    <rect x="-80" y="-30" width="160" height="10" rx="5" fill="#ECEFF1"/>
+    <rect x="-80" y="-30" width="120" height="10" rx="5" fill="#FF5722"/>
+    
+    <text x="-70" y="0" font-family="Arial" font-size="10" fill="#263238">Structural Integrity:</text>
+    <text x="70" y="0" font-family="Arial" font-size="10" text-anchor="end" fill="#F44336">27%</text>
+    
+    <text x="-70" y="20" font-family="Arial" font-size="10" fill="#263238">Debris Density:</text>
+    <text x="70" y="20" font-family="Arial" font-size="10" text-anchor="end" fill="#FF9800">High</text>
+    
+    <text x="-70" y="40" font-family="Arial" font-size="10" fill="#263238">Safe Zones:</text>
+    <text x="70" y="40" font-family="Arial" font-size="10" text-anchor="end" fill="#4CAF50">Identified</text>
+  </g>
+</svg>

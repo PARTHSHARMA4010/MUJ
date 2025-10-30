@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f5f5f5"/>
+  
+  <!-- Ground with cracks -->
+  <path d="M0,500 L800,500 L800,600 L0,600 Z" fill="#8B4513"/>
+  <path d="M100,500 L150,480 L200,500 L250,490 L300,500 L350,485 L400,500 L450,480 L500,500 L550,490 L600,500 L650,485 L700,500" fill="none" stroke="#5D4037" stroke-width="5"/>
+  
+  <!-- Damaged Building -->
+  <g>
+    <!-- Building Base -->
+    <path d="M200,500 L200,300 L400,300 L400,500 Z" fill="#B0BEC5"/>
+    
+    <!-- Broken Wall -->
+    <path d="M200,300 L200,200 L350,200 L350,300 Z" fill="#90A4AE"/>
+    <path d="M350,300 L350,250 L400,250 L400,300 Z" fill="#90A4AE"/>
+    
+    <!-- Cracks in Building -->
+    <path d="M250,500 L270,400 L290,450 L310,380 L330,500" fill="none" stroke="#37474F" stroke-width="3"/>
+    <path d="M200,350 L250,370 L300,340 L350,380 L400,350" fill="none" stroke="#37474F" stroke-width="3"/>
+    
+    <!-- Broken Roof -->
+    <path d="M180,200 L275,120 L370,200 Z" fill="#795548"/>
+    <path d="M275,120 L320,150 L350,130" fill="none" stroke="#5D4037" stroke-width="4"/>
+    
+    <!-- Windows (Broken) -->
+    <rect x="230" y="350" width="40" height="50" fill="#E3F2FD"/>
+    <path d="M230,350 L270,400" stroke="#90A4AE" stroke-width="2"/>
+    <path d="M270,350 L230,400" stroke="#90A4AE" stroke-width="2"/>
+    
+    <rect x="330" y="350" width="40" height="50" fill="#E3F2FD"/>
+    <path d="M330,350 L370,400" stroke="#90A4AE" stroke-width="2"/>
+    <path d="M370,350 L330,400" stroke="#90A4AE" stroke-width="2"/>
+    
+    <!-- Door (Damaged) -->
+    <path d="M280,500 L280,420 L320,420 L320,500 Z" fill="#5D4037"/>
+    <path d="M280,420 L320,440" stroke="#3E2723" stroke-width="2"/>
+  </g>
+  
+  <!-- Debris Pile -->
+  <g>
+    <path d="M450,500 L480,470 L520,490 L550,460 L590,500" fill="#A1887F"/>
+    <path d="M470,490 L490,480 L510,490" fill="none" stroke="#8D6E63" stroke-width="3"/>
+    <path d="M520,480 L540,470 L560,480" fill="none" stroke="#8D6E63" stroke-width="3"/>
+    
+    <!-- Concrete Chunks -->
+    <rect x="460" y="480" width="20" height="15" fill="#CFD8DC" transform="rotate(15)"/>
+    <rect x="510" y="475" width="25" height="20" fill="#CFD8DC" transform="rotate(-10)"/>
+    <rect x="540" y="485" width="15" height="12" fill="#CFD8DC" transform="rotate(5)"/>
+  </g>
+  
+  <!-- Warning Sign -->
+  <g transform="translate(650,400) rotate(10)">
+    <polygon points="0,50 25,0 50,50" fill="#FFC107" stroke="#FF6F00" stroke-width="3"/>
+    <text x="25" y="40" font-family="Arial" font-size="30" text-anchor="middle" fill="#000">!</text>
+  </g>
+</svg>
