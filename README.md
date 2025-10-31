@@ -1,114 +1,121 @@
-# 🔥 ThermalSaviour: AI-Powered Disaster Response Drone
+# 📝 generate_readme.py
+# Run this file to create a complete, formatted README.md for the Eagle Eye project.
 
-**A 24-hour hackathon project for the Disaster Response theme (PS #8).**
+readme_content = """
+# 🦅 *Eagle Eye: Drone-Based Survivor Detection*
 
-Our project is a high-speed, AI-powered command center designed to find missing persons in disaster zones using autonomous drones equipped with thermal imaging.
-
-We built a custom-trained YOLOv8 AI model that analyzes thermal video feeds to detect the heat signatures of trapped individuals, providing real-time alerts and GPS locations to rescue teams.
-
-![A demo of the project]
-*(Insert a screenshot or GIF of your React dashboard here!)*
+Eagle Eye is an AI-powered, multi-sensor drone system designed to locate missing persons in disaster zones. By fusing sound and vision detection, it provides a reliable and autonomous solution for rescue teams to identify survivors trapped in rubble or debris.
 
 ---
 
-## 🚀 The Problem
+## 📌 *Table of Contents*
 
-In a disaster like an earthquake or building collapse, the first few hours are critical for saving lives ("The Golden Hour"). Rescue teams are working against the clock, and visual searches are slow and ineffective, especially in the dark or with heavy debris.
-
-## 💡 Our Solution
-
-**ThermalSaviour** provides an intelligent "eye in the sky." We built a complete system that:
-1.  **Ingests** thermal imagery from a drone (simulated for this hackathon).
-2.  **Analyzes** the feed with a custom-trained YOLOv8 AI model that is *specifically optimized* to detect people in thermal (infrared) spectrums.
-3.  **Exposes** this AI "brain" via a high-speed FastAPI backend.
-4.  **Displays** real-time detections on a "Command Center" dashboard (built in React), plotting verified human heat signatures on a live map for rescue teams to act upon.
-
----
-
-## ✨ Key Features
-
-* **Custom-Trained AI Model:** We didn't use an "off-the-shelf" model. We fine-tuned a **YOLOv8-nano** model on a dataset of **15,000+ thermal images** to achieve high-accuracy, real-time "person" detection.
-* **High-Speed API:** The backend is built with **FastAPI** (Python), capable of processing detection requests asynchronously and serving results as clean JSON.
-* **Live Command Center:** The **React** frontend provides a dashboard with a file uploader for drone footage and a live `react-leaflet` map to visualize the exact GPS coordinates of survivors.
+- [🔍 Problem Statement](#-problem-statement)
+- [💡 Our Solution](#-our-solution)
+- [✨ Core Features](#-core-features)
+- [🛠 Tech Stack & Architecture](#%EF%B8%8F-tech-stack--architecture)
+- [🚀 Getting Started (Setup)](#-getting-started-setup)
+- [📡 Backend Details (Google Colab)](#-backend-details-google-colab)
+- [🌐 Application Modes](#-application-modes)
+- [📸 Snapshots](#-snapshots)
+- [📊 Impact and Scalability](#-impact-and-scalability)
 
 ---
 
-## 🛠️ Tech Stack
+## 🔍 *Problem Statement*
 
-| Category | Technology |
-| :--- | :--- |
-| **AI Model** | `Python`, `YOLOv8`, `PyTorch`, `Roboflow`, `Google Colab` |
-| **Backend** | `FastAPI`, `Uvicorn`, `python-multipart` |
-| **Frontend** | `React.js`, `Axios` (for API calls), `react-leaflet` (for maps) |
+In the chaotic aftermath of disasters like earthquakes, survivors trapped in rubble may be impossible to see. Their cries for help often go unheard, and conventional search methods are slow, dangerous for rescue teams, and limited by complex terrain.
 
 ---
 
-## ⚙️ How It Works (System Architecture)
+## 💡 *Our Solution*
 
-Our system is composed of two main services:
+Eagle Eye is an autonomous drone system developed to address this challenge. It integrates *high-sensitivity microphone arrays* and *advanced cameras (visual and thermal)* to detect human presence through both sound and visual cues.
 
-1.  **`drone-backend` (The AI Brain)**
-    * A Python server built with **FastAPI**.
-    * It loads our custom-trained **`best.pt`** model file.
-    * It exposes a `/detect/` endpoint that accepts an image, runs the AI model on it, and returns JSON coordinates for any "person" detected.
-
-2.  **`drone-frontend` (The Command Center)**
-    * A modern **React** application.
-    * Allows a user to upload a (simulated) thermal image from a drone.
-    * Sends the image to the `/detect/` endpoint on the backend.
-    * Receives the JSON response and plots a marker on a live map, showing the rescue team *exactly* where to go.
+Our core innovation is *AI Audio-Visual Fusion*, which analyzes multi-sensor data to confirm a survivor only when human-like sounds and visual evidence are correlated. This drastically reduces false positives from environmental noise, providing a reliable "eyes and ears in the sky" for rescue teams.
 
 ---
 
-## 🏁 How to Run This Project
+## ✨ *Core Features*
 
-You will need two separate terminals to run the backend and frontend.
-
-### 1. Backend (The AI Brain)
-
-1.  Navigate to the `drone-backend` folder:
-    ```bash
-    cd drone-backend
-    ```
-2.  Activate the Python virtual environment:
-    ```bash
-    # On Windows (PowerShell)
-    .\venv\Scripts\activate
-
-    # On macOS/Linux
-    source venv/bin/activate
-    ```
-3.  Install all required libraries:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  Start the backend server:
-    ```bash
-    uvicorn main:app --reload
-    ```
-    ✅ **The backend is now running** at `http://127.0.0.1:8000`
-
-### 2. Frontend (The Command Center)
-
-1.  Open a **new terminal** and navigate to the `drone-frontend` folder:
-    ```bash
-    cd drone-frontend
-    ```
-2.  Install all required Node.js packages:
-    ```bash
-    npm install
-    ```
-3.  Start the frontend application:
-    ```bash
-    npm start
-    ```
-    ✅ **The frontend will automatically open** at `http://localhost:3000` in your browser. You can now use the app!
+- 🎤 *Audio Localization* – Uses microphone arrays to detect and pinpoint human voice frequencies amidst debris noise.  
+- 🤖 *AI Audio-Visual Fusion* – Combines sound detection (YAMNet) with visual confirmation (YOLOv8) to drastically reduce false positives.  
+- 🗺 *GPS Mapping Dashboard* – Live Next.js dashboard marks survivor coordinates on a Google Map.  
+- 🚨 *Real-Time Alerts* – Immediate “Possible Survivor Detected” messages with image/audio evidence.  
+- 🌡 *Thermal Imaging* – Effective at night or in low-visibility conditions using thermal feeds.  
+- 🔇 *AI Noise Filtering* – Distinguishes human sounds from environmental noise.  
 
 ---
 
-## 👥 Our Team
+## 🛠 *Tech Stack & Architecture*
 
-*(Add your team name and members here!)*
-* [Your Name]
-* [Teammate's Name]
-* [Teammate's Name]
+| *Component* | *Technology* | *Purpose* |
+|----------------|----------------|-------------|
+| *Frontend* | Next.js, Google Maps API, WebSockets | Real-time rescue dashboard and survivor mapping |
+| *Backend* | Python (Flask), WebRTC/RTSP | Manages live audio/video streams and AI model API |
+| *AI / ML* | YOLOv8, YAMNet, FastReID, ChromaDB | Real-time object detection, sound classification, and feature extraction |
+| *Database* | MongoDB | Stores coordinates, timestamps, and evidence |
+| *Services* | ImageKit | Image storage and delivery |
+
+---
+
+## 🚀 *Getting Started (Setup)*
+
+### *Prerequisites*
+- Node.js (LTS version)
+- npm or yarn
+
+### *1. Clone the Repository*
+```bash
+git clone https://github.com/your-username/your-repo-name.git
+2. Navigate to the Frontend Directory
+bash
+Copy code
+cd frontend_infinite_loop
+3. Install Dependencies
+bash
+Copy code
+npm install
+4. Create Your Environment File
+Create a new file named .env in the /frontend_infinite_loop/ directory and add the following:
+
+env
+Copy code
+# --- ImageKit API Keys ---
+NEXT_PUBLIC_PUBLIC_KEY="public_2Zkndsl1hXOutn/SKRxpfp9E="
+PRIVATE_KEY="private_4pVOwljbsMAkRv2+m86aK9QLcho="
+NEXT_PUBLIC_URL_ENDPOINT="https://ik.imagekit.io/nwt5qjirj"
+
+# --- Google Maps API Keys ---
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="AIzoSyDn2Yk01bcG8OB27u6V8m5SmLqDv6NZLZI"
+NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID="4ace6850c27cf729bf4797e8"
+
+# --- Backend URL ---
+NEXT_PUBLIC_COLAB_PUBLIC_URL="https://b6c60bee3e6d.ngrok-free.app"
+5. Run the Development Server
+bash
+Copy code
+npm run dev
+Now open: http://localhost:3000
+
+📡 Backend Details (Google Colab)
+Our backend runs in a Google Colab environment to leverage free GPU access.
+
+Code Location: /backend_py/ directory
+
+Hosting: Uses ngrok to create a public URL for frontend-backend communication
+
+⚠ Important Note:
+Each time Colab restarts, the ngrok URL changes.
+If the frontend shows CORS or fetch errors, update the .env file with the new URL.
+
+🌐 Application Modes
+🏠 Home Page – Main landing & dashboard view
+
+🎯 Target Detection Mode – Fuses live video and audio to find survivors
+
+📹 Demo CCTV Upload Page – Analyze pre-recorded disaster footage
+
+🌡 Thermal Imaging Mode – For nighttime operations
+
+👥 Crowd Management Mode – Monitors crowd density in relief zones
