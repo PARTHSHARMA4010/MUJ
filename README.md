@@ -1,7 +1,3 @@
-# 📝 generate_readme.py
-# Run this file to create a complete, formatted README.md for the Eagle Eye project.
-
-readme_content = """
 # 🦅 *Eagle Eye: Drone-Based Survivor Detection*
 
 Eagle Eye is an AI-powered, multi-sensor drone system designed to locate missing persons in disaster zones. By fusing sound and vision detection, it provides a reliable and autonomous solution for rescue teams to identify survivors trapped in rubble or debris.
