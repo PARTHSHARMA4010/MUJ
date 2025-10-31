@@ -2,6 +2,7 @@
 
 Eagle Eye is an AI-powered, multi-sensor drone system designed to locate missing persons in disaster zones. By fusing sound and vision detection, it provides a reliable and autonomous solution for rescue teams to identify survivors trapped in rubble or debris.
 
+Deployed Link - https://eagleeye-khaki.vercel.app/
 ---
 
 ## 📌 *Table of Contents*
