@@ -1,19 +1,31 @@
-opencv-python-headless
+# === Core frameworks ===
+fastapi>=0.95
+uvicorn[standard]>=0.22.0
+nest-asyncio>=1.6.0
+pydantic>=1.10
+
+# === Networking / utilities ===
+requests>=2.31
+python-multipart>=0.0.6
+pyngrok>=5.2
+cloudinary>=1.36.0
+uuid  # built-in in Python, no pip install needed (safe to keep listed)
+
+# === Audio processing ===
+pydub>=0.25
+webrtcvad>=2.0.10
+# Requires ffmpeg installed on system: sudo apt install ffmpeg
+
+# === Computer Vision & AI ===
+opencv-python-headless>=4.8
+pillow>=10.0.0
 numpy==1.26.4
-deepface
-torch
-ultralytics
-nest-asyncio
-uvicorn
-requests
-fastapi
-python-multipart
-pyngrok
-torchvision
-pillow
-faiss-gpu-cu12
-tempfile
-open-clip-torch
-uuid
-pydantic
-cloudinary
+torch>=2.2.0
+torchvision>=0.17.0
+ultralytics>=8.0
+deepface>=0.0.79
+faiss-gpu-cu12>=1.7.4
+open-clip-torch>=2.24.0
+
+# === Miscellaneous ===
+tempfile  # built-in in Python, no pip install needed (safe to keep listed)
